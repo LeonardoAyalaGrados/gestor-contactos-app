@@ -25,3 +25,21 @@ Marca cada casilla cuando la regla esté implementada en el sistema y hayas veri
 - Las reglas deben validarse en el backend. Las validaciones del frontend no las reemplazan.
 - Los requerimientos funcionales relacionados con estas reglas están en `requirements.md`.
 - Las decisiones sobre autenticación, sesiones y protección de datos están en `security.md`.
+
+## Búsqueda y listado
+
+- La búsqueda admitirá coincidencias parciales (`LIKE`) por DNI, nombres y apellidos, sin distinguir mayúsculas/minúsculas y siendo compatible con tildes mediante la collation MySQL `utf8mb4_unicode_ci`.
+- El listado será paginado mediante los parámetros `page` y `size`, ordenado por apellidos y luego nombres.
+- Por defecto se listarán contactos activos. Se podrá solicitar el filtrado de contactos inactivos.
+
+## Fotografías y baja lógica
+
+- Al desactivar un contacto, este pasa a `INACTIVO` sin eliminar su registro ni su fotografía del disco.
+- Al editar un contacto con una fotografía nueva, se reemplaza el archivo anterior y se elimina el archivo previo del disco.
+- El archivo tendrá un nombre UUID generado por el sistema. El backend verificará el contenido real y aceptará JPG, JPEG, PNG o WEBP de máximo 2 MB.
+
+## Registro de auditoría
+
+- Cada evento de auditoría incluirá entidad afectada, ID de la entidad, acción, usuario que la ejecutó, detalle del cambio y timestamp.
+- Se registrarán las acciones `LOGIN`, `CREAR`, `ACTUALIZAR`, `DESACTIVAR` y `REACTIVAR`, además de las acciones de usuario que correspondan.
+- La retención será permanente en la base de datos. La aplicación no ofrecerá endpoints para editar ni eliminar registros de auditoría.

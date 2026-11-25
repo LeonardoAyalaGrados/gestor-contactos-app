@@ -22,3 +22,27 @@ Marca cada casilla cuando el control esté implementado y verificado.
 - El backend vuelve a validar los datos recibidos, aunque Angular también los valide.
 - Las fotografías cargadas se excluyen del repositorio Git.
 - La carpeta de fotografías y la base de datos deben incluirse en el plan de respaldo.
+
+## Autenticación y sesión
+
+- La API autenticará con JSON Web Tokens (JWT) enviados en el encabezado `Authorization: Bearer <token>`.
+- El token incluirá el rol `USER` o `ADMIN` y expirará 24 horas después de su emisión. El backend verificará firma, expiración y permisos en cada operación protegida.
+- El frontend guardará el token en `localStorage` para mantener la sesión al recargar o regresar a la aplicación. Lo eliminará al cerrar sesión y ante una respuesta HTTP `401` o al detectar su expiración.
+- La clave de firma JWT se suministrará mediante configuración externa y no se guardará en el repositorio.
+- No habrá registro público ni recuperación de contraseña por correo en esta versión.
+
+## Cuenta ADMIN inicial
+
+- Al iniciar, una semilla idempotente implementada con `CommandLineRunner` o un script inicial asegurará la existencia de un usuario con rol `ADMIN`.
+- La contraseña se tomará de configuración externa, se almacenará únicamente como hash BCrypt y no se incluirá en el código ni en los archivos versionados. La semilla no reemplazará ni reiniciará una cuenta existente.
+
+## Fotografías y CORS
+
+- La carpeta configurable de fotografías tendrá como ejemplo `./uploads/contactos`, fuera del código fuente; se creará al iniciar, quedará excluida de Git y deberá respaldarse junto con MySQL.
+- El backend validará el contenido real de las imágenes y su tamaño máximo de 2 MB. Solo aceptará JPG, JPEG, PNG y WEBP, y generará nombres UUID sin aceptar rutas del cliente.
+- La lectura de fotografías se hará por un endpoint autenticado y autorizado del backend, de acuerdo con `SEG-10`.
+- En desarrollo, CORS permitirá el origen del frontend Angular en `http://localhost:4200`.
+
+## Respuestas de error
+
+Los errores tendrán los campos `timestamp`, `status`, `error`, `message`, `path` y `validationErrors`. No se enviarán stacktraces, secretos, claves ni rutas internas al cliente. Los errores de validación podrán incluir detalles por campo en `validationErrors`.
