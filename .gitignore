@@ -5,4 +5,5 @@
 !.env.example
 **/.m2-local/
 **/.m2/
+frontend/src/environments/environment.generated.ts
 **/target/
