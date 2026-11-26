@@ -1,0 +1,67 @@
+{
+  "info": {
+    "_postman_id": "a5319aa6-49de-42ea-9b8a-43d865be8e8c",
+    "name": "NexoDir API",
+    "description": "Plantilla basada en los controladores actuales. Ejecuta Login primero; no guarda credenciales ni tokens en el archivo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "username", "value": "admin" },
+    { "key": "password", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "contactoId", "value": "1" },
+    { "key": "usuarioId", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 200) {", "  const body = pm.response.json();", "  pm.collectionVariables.set('token', body.accessToken);", "}"] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contactos (USER o ADMIN)",
+      "item": [
+        { "name": "Crear contacto con foto", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [ { "key": "contacto", "contentType": "application/json", "type": "text", "value": "{\"dni\":\"75224911\",\"nombres\":\"Ana\",\"apellidos\":\"Prueba NexoDir\",\"telefonos\":[\"912345678\"],\"correos\":[\"ana@example.test\"]}" }, { "key": "foto", "type": "file", "src": "" } ] }, "url": "{{baseUrl}}/contactos" } },
+        { "name": "Listar contactos activos", "request": { "method": "GET", "url": "{{baseUrl}}/contactos?page=0&size=20" } },
+        { "name": "Buscar contactos", "request": { "method": "GET", "url": "{{baseUrl}}/contactos?page=0&size=20&buscar=Ana&estado=ACTIVO" } },
+        { "name": "Consultar contacto", "request": { "method": "GET", "url": "{{baseUrl}}/contactos/{{contactoId}}" } },
+        { "name": "Actualizar contacto", "request": { "method": "PUT", "body": { "mode": "formdata", "formdata": [ { "key": "contacto", "contentType": "application/json", "type": "text", "value": "{\"dni\":\"75224911\",\"nombres\":\"Ana\",\"apellidos\":\"Prueba NexoDir Editado\",\"telefonos\":[\"912345678\"],\"correos\":[\"ana@example.test\"]}" }, { "key": "foto", "type": "file", "src": "", "disabled": true } ] }, "url": "{{baseUrl}}/contactos/{{contactoId}}" } },
+        { "name": "Obtener fotografía", "request": { "method": "GET", "url": "{{baseUrl}}/contactos/{{contactoId}}/foto" } },
+        { "name": "Desactivar contacto", "request": { "method": "PATCH", "url": "{{baseUrl}}/contactos/{{contactoId}}/desactivar" } },
+        { "name": "Reactivar contacto", "request": { "method": "PATCH", "url": "{{baseUrl}}/contactos/{{contactoId}}/reactivar" } }
+      ]
+    },
+    {
+      "name": "Usuarios (ADMIN)",
+      "item": [
+        { "name": "Listar y buscar usuarios", "request": { "method": "GET", "url": "{{baseUrl}}/usuarios?page=0&size=20&buscar=admin&estado=ACTIVO&rol=ADMIN" } },
+        { "name": "Consultar usuario", "request": { "method": "GET", "url": "{{baseUrl}}/usuarios/{{usuarioId}}" } },
+        { "name": "Crear usuario", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"usuario_prueba\",\n  \"password\": \"CAMBIAR_POR_CLAVE_DE_PRUEBA\",\n  \"rol\": \"USER\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/usuarios" } },
+        { "name": "Editar usuario", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"usuario_prueba\",\n  \"password\": \"\",\n  \"rol\": \"USER\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/usuarios/{{usuarioId}}" } },
+        { "name": "Desactivar usuario", "request": { "method": "PATCH", "url": "{{baseUrl}}/usuarios/{{usuarioId}}/desactivar" } }
+      ]
+    },
+    {
+      "name": "Auditoría (ADMIN)",
+      "item": [
+        { "name": "Listar auditoría", "request": { "method": "GET", "url": "{{baseUrl}}/auditoria?page=0&size=20" } }
+      ]
+    }
+  ]
+}

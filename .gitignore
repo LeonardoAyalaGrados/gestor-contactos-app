@@ -7,3 +7,6 @@
 **/.m2/
 frontend/src/environments/environment.generated.ts
 **/target/
+**/node_modules/
+**/dist/
+**/.angular/
