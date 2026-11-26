@@ -1,0 +1,8 @@
+/uploads/
+/.env
+**/.env
+.env.*
+!.env.example
+**/.m2-local/
+**/.m2/
+**/target/
