@@ -116,6 +116,11 @@ public class Contacto {
         correo.setContacto(this);
     }
 
+    public void limpiarMediosContacto() {
+        telefonos.clear();
+        correos.clear();
+    }
+
     public void actualizarDatos(String dni, String nombres, String apellidos, String photoPath, Usuario updatedBy) {
         this.dni = dni;
         this.nombres = nombres;

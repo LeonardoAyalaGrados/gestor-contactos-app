@@ -5,7 +5,7 @@ Marca cada casilla cuando el control esté implementado y verificado.
 | Estado | ID | Área | Control de seguridad |
 |---|---|---|---|
 | [ ] | SEG-01 | Autenticación | Solo usuarios registrados y autenticados pueden acceder a los módulos protegidos. |
-| [ ] | SEG-02 | Contraseñas | Las contraseñas se almacenan mediante un algoritmo de hash adecuado; nunca en texto plano. |
+| [x] | SEG-02 | Contraseñas | Las contraseñas se almacenan mediante un algoritmo de hash adecuado; nunca en texto plano. |
 | [ ] | SEG-03 | Sesiones | La sesión se mantiene según el requisito definido y se invalida al cerrar sesión o expirar. |
 | [ ] | SEG-04 | Autorización | El backend verifica los permisos de `USER` y `ADMIN` en cada operación protegida. |
 | [ ] | SEG-05 | Contactos | Solo usuarios autenticados pueden consultar o modificar los contactos de la empresa. |
@@ -14,8 +14,8 @@ Marca cada casilla cuando el control esté implementado y verificado.
 | [ ] | SEG-08 | Fotografías | El backend valida el contenido y tamaño de cada archivo recibido; no confía únicamente en el nombre o la extensión. |
 | [ ] | SEG-09 | Fotografías | Los nombres de archivo los genera el sistema y no se aceptan rutas proporcionadas por el usuario. |
 | [ ] | SEG-10 | Fotografías | El acceso a las fotos se realiza mediante el backend y requiere autorización. |
-| [ ] | SEG-11 | Secretos | Las credenciales y claves se configuran fuera del código y no se suben al repositorio. |
-| [ ] | SEG-12 | Errores | Las respuestas al usuario no exponen contraseñas, claves, rutas internas ni detalles técnicos sensibles. |
+| [x] | SEG-11 | Secretos | Las credenciales y claves se configuran fuera del código y no se suben al repositorio. |
+| [x] | SEG-12 | Errores | Las respuestas al usuario no exponen contraseñas, claves, rutas internas ni detalles técnicos sensibles. |
 
 ## Manejo de datos
 
@@ -46,3 +46,9 @@ Marca cada casilla cuando el control esté implementado y verificado.
 ## Respuestas de error
 
 Los errores tendrán los campos `timestamp`, `status`, `error`, `message`, `path` y `validationErrors`. No se enviarán stacktraces, secretos, claves ni rutas internas al cliente. Los errores de validación podrán incluir detalles por campo en `validationErrors`.
+
+## Estado temporal de desarrollo local
+
+Durante la verificacion inicial de endpoints, las rutas REST de contactos, fotografias y administracion de usuarios podran ejecutarse sin autenticacion. En esta fase el backend se enlaza a `127.0.0.1`; no se debe exponer en una red compartida. Esta excepcion temporal no satisface SEG-01, SEG-04, SEG-05, SEG-06 ni SEG-10 y no cambia el requisito objetivo de JWT y autorizacion. Antes de integrar o desplegar la aplicacion se debe cerrar esta excepcion e implementar los controles definidos arriba.
+
+Mientras no exista identidad autenticada por solicitud, las operaciones de contactos se atribuyen temporalmente al ADMIN inicial para trazabilidad local. Esto no equivale a la atribucion final requerida y debera reemplazarse por el usuario autenticado.

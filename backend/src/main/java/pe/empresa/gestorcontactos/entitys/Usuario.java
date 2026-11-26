@@ -69,6 +69,12 @@ public class Usuario {
         this.passwordHash = passwordHash;
     }
 
+    public void actualizar(String username, RolUsuario rol, String passwordHash) {
+        this.username = username;
+        this.rol = rol;
+        if (passwordHash != null) this.passwordHash = passwordHash;
+    }
+
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();

@@ -21,17 +21,17 @@ Marca cada casilla cuando hayas implementado y revisado el requerimiento.
 | [ ] | RF-01 | Sesión | Iniciar sesión con credenciales válidas. |
 | [ ] | RF-02 | Sesión | Cerrar sesión e invalidar el acceso a los módulos protegidos. |
 | [ ] | RF-03 | Sesión | Mantener la sesión al recargar la página o regresar posteriormente, hasta cerrar sesión o alcanzar su expiración. |
-| [ ] | RF-04 | Contactos | Registrar un contacto respetando las reglas de negocio. |
-| [ ] | RF-05 | Contactos | Consultar la agenda de contactos de la empresa. |
-| [ ] | RF-06 | Contactos | Consultar los datos completos de un contacto. |
-| [ ] | RF-07 | Contactos | Buscar contactos por DNI, nombres y apellidos. |
-| [ ] | RF-08 | Contactos | Editar los datos de un contacto respetando las reglas de negocio. |
-| [ ] | RF-09 | Contactos | Desactivar un contacto. |
-| [ ] | RF-10 | Contactos | Reactivar un contacto inactivo respetando las reglas de negocio. |
-| [ ] | RF-11 | Contactos | Agregar varios teléfonos y correos electrónicos a un contacto. |
-| [ ] | RF-12 | Contactos | Adjuntar la fotografía requerida al registrar un contacto. |
-| [ ] | RF-13 | Usuarios | Permitir que `ADMIN` cree, modifique y desactive usuarios. |
-| [ ] | RF-14 | Auditoría | Registrar la creación, modificación, desactivación y reactivación de contactos. |
+| [x] | RF-04 | Contactos | Registrar un contacto respetando las reglas de negocio. |
+| [x] | RF-05 | Contactos | Consultar la agenda de contactos de la empresa. |
+| [x] | RF-06 | Contactos | Consultar los datos completos de un contacto. |
+| [x] | RF-07 | Contactos | Buscar contactos por DNI, nombres y apellidos. |
+| [x] | RF-08 | Contactos | Editar los datos de un contacto respetando las reglas de negocio. |
+| [x] | RF-09 | Contactos | Desactivar un contacto. |
+| [x] | RF-10 | Contactos | Reactivar un contacto inactivo respetando las reglas de negocio. |
+| [x] | RF-11 | Contactos | Agregar varios teléfonos y correos electrónicos a un contacto. |
+| [x] | RF-12 | Contactos | Adjuntar la fotografía requerida al registrar un contacto. |
+| [x] | RF-13 | Usuarios | Permitir que `ADMIN` cree, modifique y desactive usuarios. |
+| [x] | RF-14 | Auditoría | Registrar la creación, modificación, desactivación y reactivación de contactos. |
 | [ ] | RF-15 | Auditoría | Permitir que solo `ADMIN` consulte la auditoría global. |
 
 ## Requerimientos de acceso
@@ -50,6 +50,13 @@ Estas precisiones complementan los requerimientos sin cambiar los identificadore
 - El inicio de sesión entregará un JWT que se enviará como `Bearer <token>`. El token durará 24 horas y contendrá el rol `USER` o `ADMIN`.
 - Angular guardará el token en `localStorage` para mantener la sesión al recargar o regresar. Lo limpiará al cerrar sesión, ante HTTP `401` o al expirar.
 - El sistema cargará una cuenta `ADMIN` inicial mediante una semilla idempotente al arrancar, con contraseña hasheada en BCrypt y suministrada por configuración externa. No habrá registro público ni recuperación por correo en esta versión.
+
+### Administración y búsqueda de usuarios
+
+- La administración de usuarios de RF-13 permitirá crear cuentas con rol `USER` o `ADMIN`, modificar su nombre de usuario, rol y contraseña, y desactivarlas sin borrarlas físicamente.
+- El listado administrativo de usuarios será paginado mediante `page` y `size`, permitirá búsqueda parcial por nombre de usuario y filtros por rol y estado. Por defecto mostrará usuarios activos.
+- Las respuestas de usuario no expondrán la contraseña ni su hash. La contraseña nueva, si se envía al actualizar, se almacenará con BCrypt.
+- No habrá registro público: las operaciones de administración corresponden al rol `ADMIN` según RP-02.
 
 ### Agenda y contactos
 
