@@ -59,6 +59,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .profile-logout { margin-left: auto; border: 0; color: #91a3ba; background: transparent; font: inherit; font-size: 10px; cursor: pointer; }
 .profile-logout:hover { color: #fff; }
 .user-actions { display: flex; gap: 6px; white-space: nowrap; }
+.form-field-hint { color: var(--muted); font-size: 10px; font-weight: 400; }
+.audit-date { min-width: 150px; white-space: nowrap; }
+.audit-action { color: var(--ink-soft); font-weight: 700; }
+.audit-detail { min-width: 220px; color: var(--muted); }
 .access-denied { max-width: 620px; margin: 56px auto; padding: 32px; }
 .access-denied h1 { margin: 8px 0; font-size: 24px; }
 .access-denied p:not(.eyebrow) { margin: 0 0 20px; color: var(--muted); }

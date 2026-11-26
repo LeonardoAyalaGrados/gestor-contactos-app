@@ -24,6 +24,8 @@ import { AuthSessionService } from './core/auth/auth-session.service';
           </a>
           @if (session.hasRole('ADMIN')) { <a routerLink="/usuarios" routerLinkActive="active">
             <span class="nav-icon">♙</span><span>Usuarios</span>
+          </a><a routerLink="/auditoria" routerLinkActive="active">
+            <span class="nav-icon">◷</span><span>Auditoría</span>
           </a> }
         </nav>
 

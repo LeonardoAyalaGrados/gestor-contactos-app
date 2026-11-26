@@ -32,14 +32,14 @@ Marca cada casilla cuando hayas implementado y revisado el requerimiento.
 | [x] | RF-12 | Contactos | Adjuntar la fotografía requerida al registrar un contacto. |
 | [x] | RF-13 | Usuarios | Permitir que `ADMIN` cree, modifique y desactive usuarios. |
 | [x] | RF-14 | Auditoría | Registrar la creación, modificación, desactivación y reactivación de contactos. |
-| [ ] | RF-15 | Auditoría | Permitir que solo `ADMIN` consulte la auditoría global. |
+| [x] | RF-15 | Auditoría | Permitir que solo `ADMIN` consulte la auditoría global. |
 
 ## Requerimientos de acceso
 
 | Estado | ID | Rol | Acceso |
 |---|---|---|---|
 | [x] | RP-01 | `USER` | Consultar, registrar, buscar, editar, desactivar y reactivar contactos. |
-| [ ] | RP-02 | `ADMIN` | Realizar las acciones de `USER`, administrar usuarios y consultar la auditoría global. |
+| [x] | RP-02 | `ADMIN` | Realizar las acciones de `USER`, administrar usuarios y consultar la auditoría global. |
 
 ## Especificaciones técnicas complementarias
 
@@ -56,6 +56,7 @@ Estas precisiones complementan los requerimientos sin cambiar los identificadore
 - La administración de usuarios de RF-13 permitirá crear cuentas con rol `USER` o `ADMIN`, modificar su nombre de usuario, rol y contraseña, y desactivarlas sin borrarlas físicamente.
 - El listado administrativo de usuarios será paginado mediante `page` y `size`, permitirá búsqueda parcial por nombre de usuario y filtros por rol y estado. Por defecto mostrará usuarios activos.
 - Las respuestas de usuario no expondrán la contraseña ni su hash. La contraseña nueva, si se envía al actualizar, se almacenará con BCrypt.
+- Un usuario autenticado no puede cambiar su propio rol; ADMIN puede cambiar el rol de otras cuentas.
 - No habrá registro público: las operaciones de administración corresponden al rol `ADMIN` según RP-02.
 
 ### Agenda y contactos
@@ -69,6 +70,7 @@ Estas precisiones complementan los requerimientos sin cambiar los identificadore
 
 - Los registros incluirán entidad afectada e ID, acción, usuario ejecutor, detalle del cambio y timestamp. Las acciones abarcan `LOGIN`, `CREAR`, `ACTUALIZAR`, `DESACTIVAR`, `REACTIVAR` y las acciones de usuario que correspondan.
 - La retención será permanente en la base de datos; la aplicación no expondrá operaciones para editar ni eliminar estos registros.
+- ADMIN consultará el historial paginado mediante `GET /api/v1/auditoria?page=&size=`, ordenado del evento más reciente al más antiguo.
 
 ### API y configuración
 

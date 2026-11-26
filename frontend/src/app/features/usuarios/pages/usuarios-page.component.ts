@@ -3,6 +3,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, map, of, startWith, Subject, switchMap, tap } from 'rxjs';
 import { readableApiError } from '../../../core/api/api-error';
+import { AuthSessionService } from '../../../core/auth/auth-session.service';
 import { UsuariosApi } from '../../../core/api/usuarios.api';
 import { PageResponse } from '../../../core/models/page.model';
 import { RolUsuario, Usuario } from '../../../core/models/usuario.model';
@@ -73,7 +74,7 @@ interface UsuarioResult { data: PageResponse<Usuario> | null; error: string; }
           <form (submit)="save($event)">
             <label class="form-field"><span>Nombre de usuario <b>*</b></span><input class="text-input" name="username" required maxlength="100" [value]="username()" (input)="updateUsername($event)" /></label>
             <label class="form-field"><span>Contraseña {{ editing() ? '(opcional al editar)' : '*' }}</span><input class="text-input" name="password" type="password" [required]="!editing()" [value]="password()" (input)="updatePassword($event)" autocomplete="new-password" /></label>
-            <label class="form-field"><span>Rol <b>*</b></span><select class="select-input" name="rol" [value]="role()" (change)="changeUserRole($event)"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></label>
+            <label class="form-field"><span>Rol <b>*</b></span><select class="select-input" name="rol" [value]="role()" [disabled]="isEditingSelf()" (change)="changeUserRole($event)"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select>@if (isEditingSelf()) { <small class="form-field-hint">No puedes cambiar el rol de tu propia cuenta.</small> }</label>
             <div class="modal-actions"><button class="button button-quiet" type="button" [disabled]="saving()" (click)="closeForm()">Cancelar</button><button class="button button-primary" type="submit" [disabled]="saving() || !username().trim() || (!editing() && !password())">{{ saving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear usuario' }}</button></div>
           </form>
         </section>
@@ -83,6 +84,7 @@ interface UsuarioResult { data: PageResponse<Usuario> | null; error: string; }
 })
 export class UsuariosPageComponent {
   private readonly api = inject(UsuariosApi);
+  private readonly session = inject(AuthSessionService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly queryChanges = new Subject<UsuarioQuery>();
 
@@ -136,10 +138,14 @@ export class UsuariosPageComponent {
 
   newUser(): void { this.editing.set(null); this.username.set(''); this.password.set(''); this.role.set('USER'); this.formError.set(''); this.formOpen.set(true); }
   editUser(user: Usuario): void { this.editing.set(user); this.username.set(user.username); this.password.set(''); this.role.set(user.rol); this.formError.set(''); this.formOpen.set(true); }
+  isEditingSelf(): boolean { return this.editing()?.id === this.session.user()?.id; }
   closeForm(): void { if (!this.saving()) this.formOpen.set(false); }
   updateUsername(event: Event): void { this.username.set((event.target as HTMLInputElement).value); }
   updatePassword(event: Event): void { this.password.set((event.target as HTMLInputElement).value); }
-  changeUserRole(event: Event): void { this.role.set((event.target as HTMLSelectElement).value as RolUsuario); }
+  changeUserRole(event: Event): void {
+    if (this.isEditingSelf()) return;
+    this.role.set((event.target as HTMLSelectElement).value as RolUsuario);
+  }
 
   save(event: SubmitEvent): void {
     event.preventDefault();

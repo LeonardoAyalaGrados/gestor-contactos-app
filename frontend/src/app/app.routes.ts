@@ -4,11 +4,13 @@ import { LoginPageComponent } from './features/login/pages/login-page.component'
 import { UsuariosPageComponent } from './features/usuarios/pages/usuarios-page.component';
 import { authenticatedGuard, adminGuard, guestGuard } from './core/auth/auth.guards';
 import { AccessDeniedPageComponent } from './features/access-denied/pages/access-denied-page.component';
+import { AuditoriaPageComponent } from './features/auditoria/pages/auditoria-page.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'contactos' },
   { path: 'contactos', component: ContactosPageComponent, canActivate: [authenticatedGuard], title: 'Contactos | NexoDir' },
   { path: 'usuarios', component: UsuariosPageComponent, canActivate: [adminGuard], title: 'Usuarios | NexoDir' },
+  { path: 'auditoria', component: AuditoriaPageComponent, canActivate: [adminGuard], title: 'Auditoría | NexoDir' },
   { path: 'acceso-denegado', component: AccessDeniedPageComponent, title: 'Acceso denegado | NexoDir' },
   { path: 'login', component: LoginPageComponent, canActivate: [guestGuard], title: 'Iniciar sesión | NexoDir' },
   { path: '**', redirectTo: 'contactos' },

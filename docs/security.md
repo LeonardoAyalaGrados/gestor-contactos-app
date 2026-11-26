@@ -10,7 +10,7 @@ Marca cada casilla cuando el control esté implementado y verificado.
 | [x] | SEG-04 | Autorización | El backend verifica los permisos de `USER` y `ADMIN` en cada operación protegida. |
 | [x] | SEG-05 | Contactos | Solo usuarios autenticados pueden consultar o modificar los contactos de la empresa. |
 | [x] | SEG-06 | Usuarios | Solo `ADMIN` puede crear, modificar o desactivar cuentas de usuario. |
-| [ ] | SEG-07 | Auditoría | Solo `ADMIN` puede consultar el historial global; la aplicación no permite modificarlo ni eliminarlo. |
+| [x] | SEG-07 | Auditoría | Solo `ADMIN` puede consultar el historial global; la aplicación no permite modificarlo ni eliminarlo. |
 | [x] | SEG-08 | Fotografías | El backend valida el contenido y tamaño de cada archivo recibido; no confía únicamente en el nombre o la extensión. |
 | [x] | SEG-09 | Fotografías | Los nombres de archivo los genera el sistema y no se aceptan rutas proporcionadas por el usuario. |
 | [x] | SEG-10 | Fotografías | El acceso a las fotos se realiza mediante el backend y requiere autorización. |
@@ -53,5 +53,6 @@ Los errores tendrán los campos `timestamp`, `status`, `error`, `message`, `path
 - Las rutas `/api/v1/contactos/**` y el endpoint de fotografías requieren JWT con rol `USER` o `ADMIN`. Las rutas `/api/v1/usuarios/**` requieren `ADMIN`.
 - El backend vuelve a comprobar que la cuenta siga activa y que su rol no haya cambiado al validar cada JWT.
 - El cierre de sesión del cliente elimina el token y los datos de sesión de `localStorage`; la API no mantiene una lista de revocación de tokens.
-- La ruta `/api/v1/auditoria/**` está restringida a `ADMIN`, aunque todavía no existe endpoint de consulta de auditoría.
+- `GET /api/v1/auditoria?page=&size=` permite a `ADMIN` consultar el historial paginado; no existen operaciones para modificar o eliminar eventos.
+- El backend rechaza que un usuario cambie su propio rol; la interfaz también deshabilita ese selector al editar la cuenta propia.
 - En desarrollo local, la API continúa enlazada por defecto a `127.0.0.1`.

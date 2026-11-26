@@ -61,6 +61,9 @@ public class UsuarioService {
         String username = request.username().trim();
         if (usuarios.existsByUsernameAndIdNot(username, id)) throw new ConflictException("Ya existe otro usuario con ese nombre de usuario.");
         Usuario actor = authenticatedUser.requireCurrentUser();
+        if (actor.getId().equals(usuario.getId()) && request.rol() != usuario.getRol()) {
+            throw new ConflictException("No puedes cambiar tu propio rol de usuario.");
+        }
         String passwordHash = request.password() == null || request.password().isBlank()
                 ? null : passwordEncoder.encode(request.password());
         usuario.actualizar(username, request.rol(), passwordHash);
