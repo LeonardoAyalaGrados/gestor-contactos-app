@@ -12,7 +12,6 @@ import pe.empresa.gestorcontactos.entitys.*;
 import pe.empresa.gestorcontactos.dto.ContactoRequest;
 import pe.empresa.gestorcontactos.dto.ContactoResponse;
 import pe.empresa.gestorcontactos.repository.ContactoRepository;
-import pe.empresa.gestorcontactos.repository.UsuarioRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,16 +22,14 @@ import java.util.Set;
 @Validated
 public class ContactoService {
     private final ContactoRepository contactos;
-    private final UsuarioRepository usuarios;
     private final AuditoriaService auditoria;
     private final PhotoStorageService photos;
-    private final String actorUsername;
+    private final AuthenticatedUserService authenticatedUser;
 
-    public ContactoService(ContactoRepository contactos, UsuarioRepository usuarios, AuditoriaService auditoria,
-                           PhotoStorageService photos,
-                           @org.springframework.beans.factory.annotation.Value("${app.admin.initial-username}") String actorUsername) {
-        this.contactos = contactos; this.usuarios = usuarios; this.auditoria = auditoria;
-        this.photos = photos; this.actorUsername = actorUsername;
+    public ContactoService(ContactoRepository contactos, AuditoriaService auditoria,
+                           PhotoStorageService photos, AuthenticatedUserService authenticatedUser) {
+        this.contactos = contactos; this.auditoria = auditoria;
+        this.photos = photos; this.authenticatedUser = authenticatedUser;
     }
 
     @Transactional(readOnly = true)
@@ -106,8 +103,7 @@ public class ContactoService {
                 c.getCorreos().stream().map(CorreoContacto::getCorreo).toList(), c.getCreatedAt(), c.getUpdatedAt());
     }
 
-    private Usuario actor() { return usuarios.findFirstByUsernameAndEstadoAndRol(actorUsername, EstadoUsuario.ACTIVO, RolUsuario.ADMIN)
-            .orElseThrow(() -> new IllegalStateException("No existe un administrador activo para atribuir la operación.")); }
+    private Usuario actor() { return authenticatedUser.requireCurrentUser(); }
 
     private void validar(ContactoRequest request) {
         if ((request.telefonos() == null || request.telefonos().isEmpty()) && (request.correos() == null || request.correos().isEmpty()))

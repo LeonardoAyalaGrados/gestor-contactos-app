@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import pe.empresa.gestorcontactos.entitys.EstadoContacto;
 import pe.empresa.gestorcontactos.dto.ContactoRequest;
 import pe.empresa.gestorcontactos.dto.ContactoResponse;
@@ -17,6 +18,7 @@ import pe.empresa.gestorcontactos.services.PhotoStorageService;
 import java.net.URI;
 
 @RestController
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 @RequestMapping("${app.api.prefix:/api/v1}/contactos")
 public class ContactoController {
     private final ContactoService service;
@@ -36,8 +38,12 @@ public class ContactoController {
     @PutMapping(value="/{id}", consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
     public ContactoResponse actualizar(@PathVariable Long id, @Valid @RequestPart("contacto") ContactoRequest request,
                                        @RequestPart(value="foto", required=false) MultipartFile foto) { return service.actualizar(id, request, foto); }
-    @PatchMapping("/{id}/desactivar") public ResponseEntity<Void> desactivar(@PathVariable Long id) { service.desactivar(id); return ResponseEntity.noContent().build(); }
-    @PatchMapping("/{id}/reactivar") public ResponseEntity<Void> reactivar(@PathVariable Long id) { service.reactivar(id); return ResponseEntity.noContent().build(); }
+    @PatchMapping("/{id}/desactivar") public ResponseEntity<Void> desactivar(@PathVariable Long id) {
+        service.desactivar(id); return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{id}/reactivar") public ResponseEntity<Void> reactivar(@PathVariable Long id) {
+        service.reactivar(id); return ResponseEntity.noContent().build();
+    }
     @GetMapping("/{id}/foto")
     public ResponseEntity<ByteArrayResource> foto(@PathVariable Long id) {
         PhotoStorageService.PhotoFile foto = service.foto(id);

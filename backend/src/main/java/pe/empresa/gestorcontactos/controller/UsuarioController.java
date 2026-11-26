@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import pe.empresa.gestorcontactos.dto.ActualizarUsuarioRequest;
 import pe.empresa.gestorcontactos.dto.CrearUsuarioRequest;
 import pe.empresa.gestorcontactos.dto.UsuarioResponse;
@@ -14,6 +15,7 @@ import pe.empresa.gestorcontactos.services.UsuarioService;
 import java.net.URI;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("${app.api.prefix:/api/v1}/usuarios")
 public class UsuarioController {
     private final UsuarioService service;

@@ -1,5 +1,9 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
+import { AuthApi } from '../../../core/api/auth.api';
+import { AuthSessionService } from '../../../core/auth/auth-session.service';
+import { readableApiError } from '../../../core/api/api-error';
 
 @Component({
   selector: 'app-login-page',
@@ -27,21 +31,20 @@ import { RouterLink } from '@angular/router';
 
           <form (submit)="submit($event)">
             <label class="field-label" for="username">Usuario</label>
-            <input class="text-input" id="username" name="username" autocomplete="username" placeholder="Tu nombre de usuario o correo" required (input)="updateUsername($event)" (blur)="touch('username')" [attr.aria-invalid]="showError('username')" />
-            @if (showError('username')) { <small class="field-error login-field-error">Ingresa tu usuario o correo.</small> }
+            <input class="text-input" id="username" name="username" autocomplete="username" placeholder="Tu nombre de usuario" required (input)="updateUsername($event)" (blur)="touch('username')" [attr.aria-invalid]="showError('username')" />
+            @if (showError('username')) { <small class="field-error login-field-error">Ingresa tu nombre de usuario.</small> }
 
             <div class="password-label-row"><label class="field-label" for="password">Contraseña</label></div>
             <input class="text-input" id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••••" required (input)="updatePassword($event)" (blur)="touch('password')" [attr.aria-invalid]="showError('password')" />
             @if (showError('password')) { <small class="field-error login-field-error">Ingresa tu contraseña.</small> }
 
-            <button class="button button-primary login-submit" type="submit" [disabled]="!valid()">Continuar <span>→</span></button>
+            <button class="button button-primary login-submit" type="submit" [disabled]="!valid() || loading()">{{ loading() ? 'Ingresando…' : 'Continuar' }} <span>→</span></button>
           </form>
 
-          @if (notice()) {
-            <div class="notice notice-info" role="status">{{ notice() }}</div>
+          @if (error()) {
+            <div class="notice notice-error" role="alert">{{ error() }}</div>
           }
-          <p class="login-availability">La autenticación se conectará en una etapa posterior.</p>
-          <a class="login-back-link" routerLink="/contactos">Volver a los contactos</a>
+          <p class="login-availability">Acceso seguro para el equipo NexoDir.</p>
         </div>
         <p class="login-legal">© 2026 NexoDir. Gestión de Contactos.</p>
       </div>
@@ -49,7 +52,12 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class LoginPageComponent {
-  readonly notice = signal('');
+  private readonly api = inject(AuthApi);
+  private readonly session = inject(AuthSessionService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly error = signal('');
+  readonly loading = signal(false);
   readonly username = signal('');
   readonly password = signal('');
   readonly touched = signal<Record<string, boolean>>({});
@@ -64,6 +72,13 @@ export class LoginPageComponent {
     event.preventDefault();
     this.touch('username'); this.touch('password');
     if (!this.valid()) return;
-    this.notice.set('La vista está lista. El inicio de sesión todavía no está conectado al backend.');
+    this.loading.set(true);
+    this.error.set('');
+    this.api.login({ username: this.username().trim(), password: this.password() })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => { this.session.acceptLogin(response); this.loading.set(false); void this.router.navigate(['/contactos']); },
+        error: (error: unknown) => { this.loading.set(false); this.error.set(readableApiError(error, 'No se pudo iniciar sesión.')); },
+      });
   }
 }

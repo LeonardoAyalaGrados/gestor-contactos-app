@@ -29,6 +29,8 @@ public class ApiExceptionHandler {
     ResponseEntity<ApiError> badRequest(Exception ex, HttpServletRequest req) { return error(HttpStatus.BAD_REQUEST, ex instanceof HttpMessageNotReadableException ? "El cuerpo de la solicitud no tiene un formato válido." : ex.getMessage(), req, Map.of()); }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ResponseEntity<ApiError> tooLarge(Exception ex, HttpServletRequest req) { return error(HttpStatus.PAYLOAD_TOO_LARGE, "El archivo supera el tamaño permitido.", req, Map.of()); }
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    ResponseEntity<ApiError> unauthorized(Exception ex, HttpServletRequest req) { return error(HttpStatus.UNAUTHORIZED, "Usuario o contraseña incorrectos.", req, Map.of()); }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiError> invalid(MethodArgumentNotValidException ex, HttpServletRequest req) {
         Map<String, String> fields = new LinkedHashMap<>();

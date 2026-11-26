@@ -1,6 +1,5 @@
 package pe.empresa.gestorcontactos.services;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.empresa.gestorcontactos.entitys.*;
@@ -10,27 +9,22 @@ import pe.empresa.gestorcontactos.repository.UsuarioRepository;
 @Service
 public class AuditoriaService {
     private final AuditoriaRepository auditoriaRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final String actorUsername;
+    private final AuthenticatedUserService authenticatedUser;
 
-    public AuditoriaService(AuditoriaRepository auditoriaRepository, UsuarioRepository usuarioRepository,
-                           @Value("${app.admin.initial-username}") String actorUsername) {
+    public AuditoriaService(AuditoriaRepository auditoriaRepository, AuthenticatedUserService authenticatedUser) {
         this.auditoriaRepository = auditoriaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.actorUsername = actorUsername;
+        this.authenticatedUser = authenticatedUser;
     }
 
     @Transactional
     public void registrar(Contacto contacto, AccionAuditoria accion, String detalle) {
-        Usuario actor = usuarioRepository.findFirstByUsernameAndEstadoAndRol(actorUsername, EstadoUsuario.ACTIVO, RolUsuario.ADMIN)
-                .orElseThrow(() -> new IllegalStateException("No existe un administrador activo para registrar auditoría."));
+        Usuario actor = authenticatedUser.requireCurrentUser();
         auditoriaRepository.save(new RegistroAuditoria(contacto, null, accion, actor, detalle));
     }
 
     @Transactional
     public void registrar(Usuario usuarioAfectado, AccionAuditoria accion, String detalle) {
-        Usuario actor = usuarioRepository.findFirstByUsernameAndEstadoAndRol(actorUsername, EstadoUsuario.ACTIVO, RolUsuario.ADMIN)
-                .orElseThrow(() -> new IllegalStateException("No existe un administrador activo para registrar auditoría."));
+        Usuario actor = authenticatedUser.requireCurrentUser();
         auditoriaRepository.save(new RegistroAuditoria(null, usuarioAfectado, accion, actor, detalle));
     }
 

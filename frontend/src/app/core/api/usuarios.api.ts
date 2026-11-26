@@ -19,4 +19,16 @@ export class UsuariosApi {
     if (query.rol) params = params.set('rol', query.rol);
     return this.http.get<PageResponse<Usuario>>(this.url, { params });
   }
+
+  crear(payload: { username: string; password: string; rol: RolUsuario }): Observable<Usuario> {
+    return this.http.post<Usuario>(this.url, payload);
+  }
+
+  actualizar(id: number, payload: { username: string; password?: string; rol: RolUsuario }): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.url}/${id}`, payload);
+  }
+
+  desactivar(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.url}/${id}/desactivar`, {});
+  }
 }

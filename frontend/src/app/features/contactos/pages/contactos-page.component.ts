@@ -111,6 +111,7 @@ interface ContactResult { data: PageResponse<Contacto> | null; error: string; }
             @if (showError('channels')) { <small class="field-error channel-error">Agrega al menos un teléfono o un correo válido.</small> }
 
             <label class="form-field photo-field"><span>Fotografía {{ editing() ? '(opcional al editar)' : '*' }}</span><input class="file-input" name="foto" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" (change)="updatePhoto($event)" (blur)="touch('photo')" [required]="!editing()" />@if (showError('photo')) { <small class="field-error">Selecciona una imagen JPG, PNG o WEBP de hasta 2 MB.</small> } @else { <small>JPG, PNG o WEBP · máximo 2 MB</small> }</label>
+            @if (!formValid() && !saving()) { <p class="form-submit-hint">Para habilitar el guardado, completa DNI, nombres y apellidos; agrega un teléfono o correo válido{{ editing() ? '.' : ' y selecciona una foto permitida.' }}</p> }
             <div class="modal-actions"><button class="button button-quiet" type="button" [disabled]="saving()" (click)="closeForm()">Cancelar</button><button class="button button-primary" type="submit" [disabled]="saving() || !formValid()">{{ saving() ? 'Guardando…' : editing() ? 'Guardar cambios' : 'Crear contacto' }}</button></div>
           </form>
         </section>
@@ -231,7 +232,7 @@ export class ContactosPageComponent implements OnDestroy {
   updateEmail(index: number, event: Event): void { this.updateValue(this.emails, index, (event.target as HTMLInputElement).value); }
   updateDni(event: Event): void { const input = event.target as HTMLInputElement; const value = input.value.replace(/\D/g, '').slice(0, 8); input.value = value; this.dni.set(value); }
   updateLetters(field: 'nombres' | 'apellidos', event: Event): void { const input = event.target as HTMLInputElement; const value = input.value.replace(/[^\p{L}\s]/gu, '').replace(/\s{2,}/g, ' '); input.value = value; (field === 'nombres' ? this.nombres : this.apellidos).set(value); }
-  updatePhoto(event: Event): void { this.photoFile.set((event.target as HTMLInputElement).files?.[0] ?? null); }
+  updatePhoto(event: Event): void { this.photoFile.set((event.target as HTMLInputElement).files?.[0] ?? null); this.touch('photo'); }
   touch(field: string): void { this.touched.update((state) => ({ ...state, [field]: true })); }
   showError(field: string): boolean { return !!this.touched()[field] && !this.fieldValid(field); }
   validPhone(value: string): boolean { return /^9\d{8}$/.test(value); }
@@ -242,16 +243,23 @@ export class ContactosPageComponent implements OnDestroy {
     event.preventDefault();
     const form = event.currentTarget as HTMLFormElement;
     this.touch('dni'); this.touch('nombres'); this.touch('apellidos'); this.touch('channels'); this.touch('photo');
-    if (!this.formValid()) return;
     const formData = new FormData(form);
-    const telefonos = formData.getAll('telefonos').map(String).map((value) => value.trim()).filter(Boolean);
-    const correos = formData.getAll('correos').map(String).map((value) => value.trim()).filter(Boolean);
+    const dni = String(formData.get('dni') ?? '').trim();
+    const nombres = String(formData.get('nombres') ?? '').trim();
+    const apellidos = String(formData.get('apellidos') ?? '').trim();
+    this.dni.set(dni);
+    this.nombres.set(nombres);
+    this.apellidos.set(apellidos);
+    if (!this.validDni(dni)) { this.formError.set('El DNI debe contener exactamente 8 dígitos numéricos.'); return; }
     if (!this.formValid()) { this.formError.set('Corrige los campos indicados antes de guardar.'); return; }
 
+    const telefonos = formData.getAll('telefonos').map(String).map((value) => value.trim()).filter(Boolean);
+    const correos = formData.getAll('correos').map(String).map((value) => value.trim()).filter(Boolean);
+
     const payload: ContactoPayload = {
-      dni: this.dni().trim(),
-      nombres: this.nombres().trim(),
-      apellidos: this.apellidos().trim(),
+      dni,
+      nombres,
+      apellidos,
       telefonos,
       correos,
     };
@@ -306,7 +314,12 @@ export class ContactosPageComponent implements OnDestroy {
     const emails = this.emails().map((value) => value.trim()).filter(Boolean);
     return phones.every((phone) => this.validPhone(phone)) && emails.every((email) => this.validEmail(email)) && emails.every((email, index) => !emails.some((other, otherIndex) => index !== otherIndex && email.toLowerCase() === other.toLowerCase())) && (phones.length > 0 || emails.length > 0);
   }
-  private validPhoto(file: File | null): boolean { return !!file && file.size <= 2 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/webp'].includes(file.type); }
+  private validPhoto(file: File | null): boolean {
+    if (!file || file.size > 2 * 1024 * 1024) return false;
+    const acceptedType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type.toLowerCase());
+    const acceptedExtension = /\.(jpe?g|png|webp)$/i.test(file.name);
+    return acceptedType || acceptedExtension;
+  }
   private fieldValid(field: string): boolean {
     if (field === 'dni') return this.validDni(this.dni());
     if (field === 'nombres') return this.validLetters(this.nombres());

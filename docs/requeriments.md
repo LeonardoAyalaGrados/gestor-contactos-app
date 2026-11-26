@@ -18,9 +18,9 @@ Marca cada casilla cuando hayas implementado y revisado el requerimiento.
 
 | Estado | ID | Área | Requerimiento |
 |---|---|---|---|
-| [ ] | RF-01 | Sesión | Iniciar sesión con credenciales válidas. |
-| [ ] | RF-02 | Sesión | Cerrar sesión e invalidar el acceso a los módulos protegidos. |
-| [ ] | RF-03 | Sesión | Mantener la sesión al recargar la página o regresar posteriormente, hasta cerrar sesión o alcanzar su expiración. |
+| [x] | RF-01 | Sesión | Iniciar sesión con credenciales válidas. |
+| [x] | RF-02 | Sesión | Cerrar sesión e invalidar el acceso a los módulos protegidos. |
+| [x] | RF-03 | Sesión | Mantener la sesión al recargar la página o regresar posteriormente, hasta cerrar sesión o alcanzar su expiración. |
 | [x] | RF-04 | Contactos | Registrar un contacto respetando las reglas de negocio. |
 | [x] | RF-05 | Contactos | Consultar la agenda de contactos de la empresa. |
 | [x] | RF-06 | Contactos | Consultar los datos completos de un contacto. |
@@ -38,7 +38,7 @@ Marca cada casilla cuando hayas implementado y revisado el requerimiento.
 
 | Estado | ID | Rol | Acceso |
 |---|---|---|---|
-| [ ] | RP-01 | `USER` | Consultar, registrar, buscar, editar, desactivar y reactivar contactos. |
+| [x] | RP-01 | `USER` | Consultar, registrar, buscar, editar, desactivar y reactivar contactos. |
 | [ ] | RP-02 | `ADMIN` | Realizar las acciones de `USER`, administrar usuarios y consultar la auditoría global. |
 
 ## Especificaciones técnicas complementarias

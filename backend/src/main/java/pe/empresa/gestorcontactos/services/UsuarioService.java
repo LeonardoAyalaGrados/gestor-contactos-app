@@ -1,7 +1,6 @@
 package pe.empresa.gestorcontactos.services;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,15 +23,14 @@ public class UsuarioService {
     private final UsuarioRepository usuarios;
     private final AuditoriaService auditoria;
     private final PasswordEncoder passwordEncoder;
-    private final String adminUsername;
+    private final AuthenticatedUserService authenticatedUser;
 
     public UsuarioService(UsuarioRepository usuarios, AuditoriaService auditoria,
-                          PasswordEncoder passwordEncoder,
-                          @Value("${app.admin.initial-username}") String adminUsername) {
+                          PasswordEncoder passwordEncoder, AuthenticatedUserService authenticatedUser) {
         this.usuarios = usuarios;
         this.auditoria = auditoria;
         this.passwordEncoder = passwordEncoder;
-        this.adminUsername = adminUsername;
+        this.authenticatedUser = authenticatedUser;
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +48,7 @@ public class UsuarioService {
     public UsuarioResponse crear(@Valid CrearUsuarioRequest request) {
         String username = request.username().trim();
         if (usuarios.findByUsername(username).isPresent()) throw new ConflictException("Ya existe un usuario con ese nombre de usuario.");
-        Usuario actor = actor();
+        Usuario actor = authenticatedUser.requireCurrentUser();
         Usuario usuario = new Usuario(username, passwordEncoder.encode(request.password()), request.rol(), EstadoUsuario.ACTIVO);
         Usuario guardado = usuarios.saveAndFlush(usuario);
         auditoria.registrarUsuario(guardado, actor, AccionAuditoria.CREAR_USUARIO, "Usuario creado.");
@@ -62,7 +60,7 @@ public class UsuarioService {
         Usuario usuario = encontrar(id);
         String username = request.username().trim();
         if (usuarios.existsByUsernameAndIdNot(username, id)) throw new ConflictException("Ya existe otro usuario con ese nombre de usuario.");
-        Usuario actor = actor();
+        Usuario actor = authenticatedUser.requireCurrentUser();
         String passwordHash = request.password() == null || request.password().isBlank()
                 ? null : passwordEncoder.encode(request.password());
         usuario.actualizar(username, request.rol(), passwordHash);
@@ -74,19 +72,13 @@ public class UsuarioService {
     public void desactivar(Long id) {
         Usuario usuario = encontrar(id);
         if (usuario.getEstado() == EstadoUsuario.INACTIVO) throw new ConflictException("El usuario ya está inactivo.");
-        Usuario actor = actor();
+        Usuario actor = authenticatedUser.requireCurrentUser();
         usuario.cambiarEstado(EstadoUsuario.INACTIVO);
         auditoria.registrarUsuario(usuario, actor, AccionAuditoria.DESACTIVAR_USUARIO, "Usuario desactivado.");
     }
 
     private Usuario encontrar(Long id) {
         return usuarios.findById(id).orElseThrow(() -> new ResourceNotFoundException("No se encontró el usuario."));
-    }
-
-    private Usuario actor() {
-        return usuarios.findFirstByUsernameAndEstadoAndRol(adminUsername, EstadoUsuario.ACTIVO, RolUsuario.ADMIN)
-                .or(() -> usuarios.findFirstByEstadoAndRol(EstadoUsuario.ACTIVO, RolUsuario.ADMIN))
-                .orElseThrow(() -> new IllegalStateException("No existe un administrador activo para atribuir la operación."));
     }
 
     private static UsuarioResponse view(Usuario usuario) {
